@@ -26,8 +26,35 @@ button[kind="header"],
 button[kind="header"] * {
     visibility: visible !important; opacity: 1 !important; pointer-events: auto !important;
 }
+[data-testid="collapsedControl"] {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: fixed !important;
+    top: 14px !important;
+    left: 14px !important;
+    z-index: 99999 !important;
+    background: rgba(16,185,129,0.12) !important;
+    border: 1px solid rgba(16,185,129,0.28) !important;
+    border-radius: 8px !important;
+    padding: 4px !important;
+    backdrop-filter: blur(8px) !important;
+    box-shadow: 0 0 16px rgba(16,185,129,0.2) !important;
+    transition: all 0.2s !important;
+}
+[data-testid="collapsedControl"]:hover {
+    background: rgba(16,185,129,0.22) !important;
+    border-color: rgba(16,185,129,0.5) !important;
+    box-shadow: 0 0 24px rgba(16,185,129,0.35) !important;
+}
+[data-testid="collapsedControl"] svg {
+    display: block !important;
+    fill: #10b981 !important;
+    color: #10b981 !important;
+}
 .block-container { padding: 0 !important; max-width: 100% !important; }
 
+            
 /* ── VARIABLES ── */
 :root {
     --bg0:      #0c0e17;
