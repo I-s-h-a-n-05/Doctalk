@@ -12,6 +12,132 @@ st.set_page_config(page_title="DocTalk", page_icon="◎", layout="wide",
                    initial_sidebar_state="expanded")
 init_db()
 
+# ── Inject persistent sidebar toggle button via JS ──
+components.html("""
+<script>
+(function() {
+  var SIDEBAR_W = 244;   // px — Streamlit default sidebar width
+  var _open = null;      // track state: null = unknown, true/false
+
+  function getSidebar() {
+    var pd = window.parent.document;
+    return pd.querySelector('[data-testid="stSidebar"]');
+  }
+
+  function getMainBlock() {
+    var pd = window.parent.document;
+    return (
+      pd.querySelector('[data-testid="stAppViewContainer"] > .main') ||
+      pd.querySelector('.main.css-uf99v8') ||
+      pd.querySelector('.main')
+    );
+  }
+
+  function isCurrentlyOpen() {
+    var sb = getSidebar();
+    if (!sb) return false;
+    // Streamlit sets aria-expanded="false" OR applies translateX when collapsed
+    var aria = sb.getAttribute('aria-expanded');
+    if (aria === 'false') return false;
+    if (aria === 'true')  return true;
+    var tx = window.parent.getComputedStyle(sb).transform;
+    if (tx && tx !== 'none' && tx.includes('matrix')) {
+      // matrix(1,0,0,1,tx,ty) — negative tx means it's slid off screen
+      var m = tx.match(/matrix\([^,]+,[^,]+,[^,]+,[^,]+,([^,]+),/);
+      if (m && parseFloat(m[1]) < -10) return false;
+    }
+    return sb.offsetWidth > 10;
+  }
+
+  function openSidebar() {
+    var sb = getSidebar();
+    if (!sb) return;
+    sb.style.transform        = 'none';
+    sb.style.visibility       = 'visible';
+    sb.style.opacity          = '1';
+    sb.style.minWidth         = SIDEBAR_W + 'px';
+    sb.style.maxWidth         = SIDEBAR_W + 'px';
+    sb.style.width            = SIDEBAR_W + 'px';
+    sb.setAttribute('aria-expanded', 'true');
+    _open = true;
+    updateBtnIcon();
+  }
+
+  function closeSidebar() {
+    var sb = getSidebar();
+    if (!sb) return;
+    sb.style.transform        = 'translateX(-' + (SIDEBAR_W + 20) + 'px)';
+    sb.style.minWidth         = '0';
+    sb.style.maxWidth         = '0';
+    sb.style.width            = '0';
+    sb.setAttribute('aria-expanded', 'false');
+    _open = false;
+    updateBtnIcon();
+  }
+
+  function updateBtnIcon() {
+    var btn = window.parent.document.getElementById('dt-sidebar-toggle');
+    if (!btn) return;
+    btn.innerHTML = _open === false ? '&#9776;' : '&#10005;';
+    btn.style.left = _open === false ? '14px' : (SIDEBAR_W + 14) + 'px';
+  }
+
+  function injectToggle() {
+    var pd = window.parent.document;
+    if (pd.getElementById('dt-sidebar-toggle')) {
+      // already exists — just re-sync state
+      _open = isCurrentlyOpen();
+      updateBtnIcon();
+      return;
+    }
+
+    var style = pd.createElement('style');
+    style.id = 'dt-toggle-style';
+    style.textContent = [
+      '#dt-sidebar-toggle {',
+      '  position: fixed; top: 14px; left: 14px; z-index: 999999;',
+      '  width: 36px; height: 36px; border-radius: 8px;',
+      '  background: rgba(16,185,129,0.13);',
+      '  border: 1px solid rgba(16,185,129,0.30);',
+      '  color: #10b981; font-size: 18px; line-height: 1;',
+      '  cursor: pointer; display: flex; align-items: center; justify-content: center;',
+      '  backdrop-filter: blur(8px);',
+      '  box-shadow: 0 0 14px rgba(16,185,129,0.18);',
+      '  transition: left 0.28s cubic-bezier(0.4,0,0.2,1), background 0.18s, box-shadow 0.18s;',
+      '}',
+      '#dt-sidebar-toggle:hover {',
+      '  background: rgba(16,185,129,0.25) !important;',
+      '  box-shadow: 0 0 28px rgba(16,185,129,0.40) !important;',
+      '}'
+    ].join('');
+    pd.head.appendChild(style);
+
+    var btn = pd.createElement('button');
+    btn.id    = 'dt-sidebar-toggle';
+    btn.title = 'Toggle sidebar';
+    btn.innerHTML = '&#9776;';
+
+    btn.addEventListener('click', function() {
+      if (isCurrentlyOpen()) { closeSidebar(); }
+      else                   { openSidebar();  }
+    });
+
+    pd.body.appendChild(btn);
+
+    // Sync initial state
+    setTimeout(function() {
+      _open = isCurrentlyOpen();
+      updateBtnIcon();
+    }, 200);
+  }
+
+  injectToggle();
+  setTimeout(injectToggle, 400);
+  setTimeout(injectToggle, 1200);
+})();
+</script>
+""", height=0)
+
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Syne:wght@600;700;800&display=swap');
@@ -1520,6 +1646,42 @@ elif st.session_state.documents and active and not staged and not st.session_sta
             <div style="font-size:15px;color:#94a3b8;line-height:1.9">{summary_html}</div>
           </div>
         </div>""", unsafe_allow_html=True)
+
+        # ── Export row ────────────────────────────────────────────────────────
+        st.markdown("""
+        <div style="max-width:740px;margin:4px auto 0;padding:0 20px">
+          <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.4px;color:#4b5563;margin-bottom:8px;padding-left:2px">Export</div>
+        </div>""", unsafe_allow_html=True)
+        _, ex1, ex2, ex3, ex4, _ = st.columns([2.5, 1.5, 1.5, 1.5, 1.5, 2.5])
+        with ex1:
+            st.download_button(
+                "📄 Summary TXT",
+                data=(f"DocTalk — Summary\nDocument: {meta['title']}\n\n{doc['summary']}").encode(),
+                file_name=f"summary_{meta['title'][:20].replace(' ','_')}.txt",
+                mime="text/plain", use_container_width=True, key="sum_txt"
+            )
+        with ex2:
+            st.download_button(
+                "📑 Summary PDF",
+                data=export_chat_as_pdf(meta["title"],
+                    [{"role":"assistant","content":f"**Summary of {meta['title']}**\n\n{doc['summary']}"}]),
+                file_name=f"summary_{meta['title'][:20].replace(' ','_')}.pdf",
+                mime="application/pdf", use_container_width=True, key="sum_pdf"
+            )
+        with ex3:
+            st.download_button(
+                "💬 Chat TXT",
+                data=export_chat_as_text(meta["title"], chat).encode() if chat else b"No chat history yet.",
+                file_name=f"chat_{meta['title'][:20].replace(' ','_')}.txt",
+                mime="text/plain", use_container_width=True, key="chat_txt_sum"
+            )
+        with ex4:
+            st.download_button(
+                "💬 Chat PDF",
+                data=export_chat_as_pdf(meta["title"], chat) if chat else export_chat_as_pdf(meta["title"], [{"role":"assistant","content":"No chat history yet."}]),
+                file_name=f"chat_{meta['title'][:20].replace(' ','_')}.pdf",
+                mime="application/pdf", use_container_width=True, key="chat_pdf_sum"
+            )
 
     # ════════════════════════════════════════════════════════════════════════
     # DOCUMENTS TAB
