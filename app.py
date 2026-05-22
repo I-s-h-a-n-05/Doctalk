@@ -244,8 +244,8 @@ div[data-testid="stHorizontalBlock"]:has(.topbar) {
 /* ── CHAT CONTAINER ── */
 div[data-testid="stVerticalBlockBorderWrapper"][style*="overflow-y: auto"],
 div[data-testid="stVerticalBlockBorderWrapper"][style*="overflow-y:auto"] {
-    height: calc(100vh - 320px) !important;
-    min-height: 220px !important;
+    height: calc(100vh - 500px) !important;
+    min-height: 180px !important;
 }
 
 /* ── TAB LABELS — bigger and more polished ── */
@@ -1441,7 +1441,7 @@ elif st.session_state.documents and active and not staged and not st.session_sta
                 doc_ids = list(st.session_state.documents.keys()); st.session_state.diff_doc_a = doc_ids[0]; st.session_state.diff_doc_b = doc_ids[1]; st.rerun()
 
     # ── Tabs — Map is now a floating panel, so only 3 tabs ────────────────────
-    tab_chat, tab_sum, tab_docs = st.tabs(["  &#128172;  Chat  ", "  &#128203;  Summary  ", "  &#128193;  Documents  "])
+    tab_chat, tab_sum, tab_docs = st.tabs(["  Chat  ", "  Summary  ", "  Documents  "])
 
     # ════════════════════════════════════════════════════════════════════════
     # CHAT TAB
@@ -1494,7 +1494,7 @@ elif st.session_state.documents and active and not staged and not st.session_sta
                     if col.button(sq, key=f"sq{i}", use_container_width=True): st.session_state[f"pf_{active}"] = sq; st.rerun()
                 st.markdown('</div></div>', unsafe_allow_html=True)
 
-            chat_container = st.container(height=420, border=False)
+            chat_container = st.container(height=180 if not chat else 420, border=False)
             with chat_container:
                 st.markdown('<div class="chat-outer">', unsafe_allow_html=True)
                 for idx, turn in enumerate(chat):
