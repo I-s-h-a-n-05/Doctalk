@@ -180,6 +180,16 @@ button[kind="header"] * {
 }
 .block-container { padding: 0 !important; max-width: 100% !important; }
 
+/* ── Sticky chat input ── */
+div[data-testid="stForm"] {
+    position: sticky !important;
+    bottom: 0 !important;
+    z-index: 200 !important;
+    background: #0c0e17 !important;
+    padding: 10px 0 6px !important;
+    border-top: 1px solid rgba(255,255,255,0.06) !important;
+}
+
             
 /* ── VARIABLES ── */
 :root {
@@ -244,8 +254,8 @@ div[data-testid="stHorizontalBlock"]:has(.topbar) {
 /* ── CHAT CONTAINER ── */
 div[data-testid="stVerticalBlockBorderWrapper"][style*="overflow-y: auto"],
 div[data-testid="stVerticalBlockBorderWrapper"][style*="overflow-y:auto"] {
-    height: calc(100vh - 500px) !important;
-    min-height: 180px !important;
+    height: calc(100vh - 320px) !important;
+    min-height: 220px !important;
 }
 
 /* ── TAB LABELS — bigger and more polished ── */
@@ -1494,7 +1504,7 @@ elif st.session_state.documents and active and not staged and not st.session_sta
                     if col.button(sq, key=f"sq{i}", use_container_width=True): st.session_state[f"pf_{active}"] = sq; st.rerun()
                 st.markdown('</div></div>', unsafe_allow_html=True)
 
-            chat_container = st.container(height=180 if not chat else 420, border=False)
+            chat_container = st.container(height=420, border=False)
             with chat_container:
                 st.markdown('<div class="chat-outer">', unsafe_allow_html=True)
                 for idx, turn in enumerate(chat):
