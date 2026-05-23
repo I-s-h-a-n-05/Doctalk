@@ -254,7 +254,7 @@ div[data-testid="stHorizontalBlock"]:has(.topbar) {
 /* ── CHAT CONTAINER ── */
 div[data-testid="stVerticalBlockBorderWrapper"][style*="overflow-y: auto"],
 div[data-testid="stVerticalBlockBorderWrapper"][style*="overflow-y:auto"] {
-    height: calc(100vh - 320px) !important;
+    height: calc(100vh - 450px) !important;
     min-height: 220px !important;
 }
 
