@@ -1,4 +1,7 @@
-import fitz
+try:
+    import fitz                  # PyMuPDF < 1.24
+except ModuleNotFoundError:
+    import pymupdf as fitz       # PyMuPDF >= 1.24
 import re
 from config import CHUNK_SIZE, CHUNK_OVERLAP
 

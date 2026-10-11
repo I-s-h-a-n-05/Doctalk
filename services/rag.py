@@ -1,9 +1,19 @@
 import re
 import json
-from groq import Groq
-from config import GROQ_API_KEY, GROQ_MODEL
+import cohere
+from config import COHERE_API_KEY, COHERE_MODEL
 
-client = Groq(api_key=GROQ_API_KEY)
+client = cohere.ClientV2(api_key=COHERE_API_KEY)
+
+
+def _extract_text(response):
+    """Extract the text content from a Cohere response, skipping any thinking blocks."""
+    for item in response.message.content:
+        if item.type == "text":
+            return item.text
+    # Fallback: stringify the first item
+    first = response.message.content[0]
+    return getattr(first, "text", str(first))
 
 # ── Single-document Q&A ───────────────────────────────────────────────────────
 SYSTEM_PROMPT = """You are DocTalk, an elite document intelligence assistant built on a retrieval-augmented generation pipeline. You are precise, insightful, and authoritative — the kind of AI a Fortune 500 analyst or PhD researcher would trust without hesitation.
@@ -198,13 +208,13 @@ def answer_question(question, retrieved_chunks, chat_history=None):
         )
     })
 
-    response = client.chat.completions.create(
-        model=GROQ_MODEL,
+    response = client.chat(
+        model=COHERE_MODEL,
         messages=messages,
         temperature=0.15,
         max_tokens=1536,
     )
-    return response.choices[0].message.content
+    return _extract_text(response)
 
 
 def answer_cross_doc(question, retrieved_chunks, chat_history=None):
@@ -233,13 +243,13 @@ def answer_cross_doc(question, retrieved_chunks, chat_history=None):
         )
     })
 
-    response = client.chat.completions.create(
-        model=GROQ_MODEL,
+    response = client.chat(
+        model=COHERE_MODEL,
         messages=messages,
         temperature=0.15,
         max_tokens=2048,
     )
-    return response.choices[0].message.content
+    return _extract_text(response)
 
 
 def answer_diff(question, chunks_a, chunks_b, title_a, title_b, chat_history=None):
@@ -265,13 +275,13 @@ def answer_diff(question, chunks_a, chunks_b, title_a, title_b, chat_history=Non
         )
     })
 
-    response = client.chat.completions.create(
-        model=GROQ_MODEL,
+    response = client.chat(
+        model=COHERE_MODEL,
         messages=messages,
         temperature=0.15,
         max_tokens=2048,
     )
-    return response.choices[0].message.content
+    return _extract_text(response)
 
 
 def summarize_document(pages, doc_title="document"):
@@ -310,13 +320,13 @@ def summarize_document(pages, doc_title="document"):
         }
     ]
 
-    response = client.chat.completions.create(
-        model=GROQ_MODEL,
+    response = client.chat(
+        model=COHERE_MODEL,
         messages=messages,
         temperature=0.2,
         max_tokens=1400,
     )
-    return response.choices[0].message.content
+    return _extract_text(response)
 
 
 def suggest_followups(question, answer, retrieved_chunks):
@@ -345,8 +355,8 @@ def suggest_followups(question, answer, retrieved_chunks):
     )
 
     try:
-        response = client.chat.completions.create(
-            model=GROQ_MODEL,
+        response = client.chat(
+            model=COHERE_MODEL,
             messages=[
                 {"role": "system", "content": FOLLOWUP_SYSTEM_PROMPT},
                 {"role": "user", "content": prompt}
@@ -354,7 +364,7 @@ def suggest_followups(question, answer, retrieved_chunks):
             temperature=0.4,
             max_tokens=320,
         )
-        raw = response.choices[0].message.content.strip()
+        raw = _extract_text(response).strip()
         raw = re.sub(r"^```[a-z]*\n?", "", raw, flags=re.IGNORECASE).replace("```", "").strip()
         parsed = json.loads(raw)
         if isinstance(parsed, list):

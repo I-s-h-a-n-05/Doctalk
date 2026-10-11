@@ -1,7 +1,17 @@
-from groq import Groq
-from config import GROQ_API_KEY, GROQ_MODEL
+import cohere
+from config import COHERE_API_KEY, COHERE_MODEL
 
-client = Groq(api_key=GROQ_API_KEY)
+client = cohere.ClientV2(api_key=COHERE_API_KEY)
+
+
+def _extract_text(response):
+    """Extract the text content from a Cohere response, skipping any thinking blocks."""
+    for item in response.message.content:
+        if item.type == "text":
+            return item.text
+    # Fallback: stringify the first item
+    first = response.message.content[0]
+    return getattr(first, "text", str(first))
 
 SYSTEM_PROMPT = """You are DocTalk, an elite document intelligence assistant built on a retrieval-augmented generation pipeline. You are precise, insightful, and authoritative — the kind of AI a Fortune 500 analyst or PhD researcher would trust without hesitation.
 
@@ -52,7 +62,7 @@ def generate_answer(
     chat_history: list[dict] = None
 ) -> str:
     """
-    Generate a grounded answer using Groq LLM.
+    Generate a grounded answer using Cohere LLM.
     chat_history: list of {role, content} dicts for multi-turn context.
     """
     context = build_context(retrieved_chunks)
@@ -72,11 +82,11 @@ def generate_answer(
 
     messages.append({"role": "user", "content": user_message})
 
-    response = client.chat.completions.create(
-        model=GROQ_MODEL,
+    response = client.chat(
+        model=COHERE_MODEL,
         messages=messages,
         temperature=0.15,   # low temperature for factual grounding
         max_tokens=1536,
     )
 
-    return response.choices[0].message.content
+    return _extract_text(response)

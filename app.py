@@ -1285,10 +1285,10 @@ elif not st.session_state.documents and not staged:
             <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:#475569;flex-shrink:0">Built with</div>
             <div style="display:flex;flex-wrap:wrap;gap:7px">
               <span style="font-size:12px;font-weight:600;padding:4px 12px;border-radius:20px;border:1px solid rgba(110,231,183,0.18);background:rgba(110,231,183,0.06);color:#6ee7b7">Streamlit</span>
-              <span style="font-size:12px;font-weight:600;padding:4px 12px;border-radius:20px;border:1px solid rgba(110,231,183,0.18);background:rgba(110,231,183,0.06);color:#6ee7b7">Llama 3-70B</span>
+              <span style="font-size:12px;font-weight:600;padding:4px 12px;border-radius:20px;border:1px solid rgba(110,231,183,0.18);background:rgba(110,231,183,0.06);color:#6ee7b7">Command A+</span>
               <span style="font-size:12px;font-weight:600;padding:4px 12px;border-radius:20px;border:1px solid rgba(110,231,183,0.18);background:rgba(110,231,183,0.06);color:#6ee7b7">FAISS</span>
               <span style="font-size:12px;font-weight:600;padding:4px 12px;border-radius:20px;border:1px solid rgba(255,255,255,0.07);background:rgba(255,255,255,0.02);color:#94a3b8">sentence-transformers</span>
-              <span style="font-size:12px;font-weight:600;padding:4px 12px;border-radius:20px;border:1px solid rgba(255,255,255,0.07);background:rgba(255,255,255,0.02);color:#94a3b8">Groq API</span>
+              <span style="font-size:12px;font-weight:600;padding:4px 12px;border-radius:20px;border:1px solid rgba(255,255,255,0.07);background:rgba(255,255,255,0.02);color:#94a3b8">Cohere API</span>
               <span style="font-size:12px;font-weight:600;padding:4px 12px;border-radius:20px;border:1px solid rgba(255,255,255,0.07);background:rgba(255,255,255,0.02);color:#94a3b8">PyMuPDF</span>
               <span style="font-size:12px;font-weight:600;padding:4px 12px;border-radius:20px;border:1px solid rgba(255,255,255,0.07);background:rgba(255,255,255,0.02);color:#94a3b8">SQLite</span>
             </div>
